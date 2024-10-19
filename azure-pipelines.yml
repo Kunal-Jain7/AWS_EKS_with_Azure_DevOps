@@ -15,4 +15,5 @@ stages:
   jobs:
   - job: initializeTerraform
     steps:
-    - bash: terraform init terraform/
+    - bash: cd terraform
+    - bash: ls -ltrh
