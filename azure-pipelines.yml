@@ -11,13 +11,8 @@ pool:
   demands: Agent.Name -equals Kunal-Jains-MacBook-Pro
 
 stages:
-- stage: checking_working_directory
+- stage: terraformInit
   jobs:
-  - job: GetWorrkingDirectory
+  - job: initializeTerraform
     steps:
-    - bash: echo $(System.DefaultWorkingDirectory)
-    - bash: echo ls -R $(System.DefaultWorkingDirectory)
-    - bash: echo $(Build.ArtifactStagingDirectory)
-    - bash: echo ls -R $(Build.ArtifactStagingDirectory)
-    - bash: pwd
-    - bash: ls -ltrh
+    - bash: terraform init terraform/
