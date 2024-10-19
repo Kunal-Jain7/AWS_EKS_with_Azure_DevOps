@@ -17,3 +17,5 @@ stages:
     steps:
     - bash: echo $(System.DefaultWorkingDirectory)
     - bash: echo ls -R $(System.DefaultWorkingDirectory)
+    - bash: echo $(Build.ArtifactStagingDirectory)
+    - bash: echo ls -R $(Build.ArtifactStagingDirectory)
