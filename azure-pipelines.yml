@@ -24,4 +24,4 @@ steps:
     inputs:
       targetType: 'inline'
       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-      script: 'terraform select $(ENVTODEPLOY) || terraform workspace new $(ENVTODEPLOY)'
+      script: 'terraform workspace select $(ENVTODEPLOY) || terraform workspace new $(ENVTODEPLOY)'
