@@ -19,3 +19,9 @@ steps:
       targetType: 'inline'
       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
       script: 'terraform init'
+  
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      script: 'terraform select $(ENVTODEPLOY) || terraform workspace new $(ENVTODEPLOY)'
