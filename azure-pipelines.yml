@@ -35,5 +35,6 @@ steps:
       targetType: 'inline'
       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
       script: 'terraform plan -out=terraform.plan -detailed-exitcode -input=false -no-color | tee terraform-$(ENVTODEPLOY)-plan.txt'
+      failOnStderr: true
 
 
