@@ -39,7 +39,7 @@ steps:
   
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: 'terraform-$(ENVTODEPLOY)-plan.txt'
+      PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan.txt'
       ArtifactName: 'terraform-$(ENVTODEPLOY)-plan'
     displayName: 'Archive Terraform Plan Output'
   
@@ -54,7 +54,7 @@ steps:
     displayName: 'Archive Terraform Plan JSON'
   
   - script: |
-      rm terraform-$(infrastructureName)-plan.txt
+      rm terraform-$(ENVTODEPLOY)-plan.txt
       rm terraform_plan.json
     displayName: 'Clean Up'
 
