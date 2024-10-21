@@ -42,5 +42,20 @@ steps:
       PathtoPublish: 'terraform-$(ENVTODEPLOY)-plan.txt'
       ArtifactName: 'terraform-$(ENVTODEPLOY)-plan'
     displayName: 'Archive Terraform Plan Output'
+  
+  - script: |
+      terraform show -json terraform.plan | python3 -m json.tool > terraform_plan.json
+    displayName: 'Convert Terraform Plan to JSON'
+    
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'terraform_plan.json'
+      artifactName: 'terraform-plan-json'
+    displayName: 'Archive Terraform Plan JSON'
+  
+  - script: |
+      rm terraform-$(infrastructureName)-plan.txt
+      rm terraform_plan.json
+    displayName: 'Clean Up'
 
 
