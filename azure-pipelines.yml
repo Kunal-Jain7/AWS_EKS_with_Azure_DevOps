@@ -36,5 +36,11 @@ steps:
       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
       script: 'terraform plan -out=terraform.plan -detailed-exitcode -input=false -no-color | tee terraform-$(ENVTODEPLOY)-plan.txt'
       failOnStderr: true
+  
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'terraform-$(ENVTODEPLOY)-plan.txt'
+      ArtifactName: 'terraform-$(ENVTODEPLOY)-plan'
+    displayName: 'Archive Terraform Plan Output'
 
 
