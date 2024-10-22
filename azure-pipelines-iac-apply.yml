@@ -53,3 +53,41 @@ stages:
           rm terraform-$(ENVTODEPLOY)-plan.txt
         displayName: 'Clean Up'
         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+
+- stage: Apply
+  displayName: 'Terraform Apply'
+  dependsOn: Plan
+  condition: and(succeeded(), eq(variables['terraformApplyPlan'], 'true'))
+  jobs:
+    - job: TerraformApply
+      pool:
+       name: Mac_Kubernetes_Helm
+       demands: Agent.Name -equals Kunal-Jains-MacBook-Pro
+
+      steps:
+        - script: echo Terraform Infrastructure Build
+          displayName: 'Initializing the Infra'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+        
+        - task: DownloadPipelineArtifact@2
+          inputs:
+            targetPath: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan.txt'
+            artifactName: 'terraform-$(ENVTODEPLOY)-plan'
+          displayName: 'Download Terraform Plan Artifact'
+      
+        - task: Bash@3
+          inputs:
+           targetType: inline
+           script: |
+             terraform apply -input=false $(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan | tee terraform-apply.txt
+        
+        - task: PublishBuildArtifacts@1
+          inputs:
+           PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-apply.txt'
+           ArtifactName: 'terraform-$(ENVTODEPLOY)-apply'
+          displayName: 'Archive Terraform Apply Output'
+        
+        - script: |
+            rm terraform-$(ENVTODEPLOY)-apply.txt
+          displayName: 'Clean Up'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
