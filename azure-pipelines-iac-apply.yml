@@ -1,0 +1,55 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+stages:
+- stage: Plan
+  displayName: 'Terraform init and Plan'
+  jobs:
+  - job: TerraformInitandPlan
+  pool:
+    name: Mac_Kubernetes_Helm
+    demands: Agent.Name -equals Kunal-Jains-MacBook-Pro
+
+    steps:
+      - script: echo Terraform Infrastructure Build
+        displayName: 'Initializing the Infra'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      
+      - task: Bash@3
+        inputs:
+          targetType: inline
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          script: 'terraform init'
+      
+      - task: Bash@3
+        inputs:
+          targetType: inline
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          script: 'terraform workspace select $(ENVTODEPLOY) || terraform workspace new $(ENVTODEPLOY)'
+      
+      - script: echo Terraform infrastructure Plan
+        displayName: 'Running the terraform plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      
+      - task: Bash@3
+        inputs:
+          targetType: inline
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          script: 'terraform plan -out=terraform.plan -detailed-exitcode -input=false -no-color | tee terraform-$(ENVTODEPLOY)-plan.txt'
+          failOnStderr: true
+      
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan.txt'
+          ArtifactName: 'terraform-$(ENVTODEPLOY)-plan'
+        displayName: 'Archive Terraform Plan Output'
+      
+      - script: |
+          rm terraform-$(ENVTODEPLOY)-plan.txt
+        displayName: 'Clean Up'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
