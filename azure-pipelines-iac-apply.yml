@@ -51,6 +51,16 @@ stages:
         displayName: 'Archive Terraform Plan Output'
       
       - script: |
+          terraform show -json terraform.plan | python3 -m json.tool > terraform_plan.json
+        displayName: 'Convert Terraform Plan to JSON'
+      
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform_plan.json'
+          ArtifactName: 'terraform-plan-json'
+        displayName: 'Archive Terraform Plan JSON'
+
+      - script: |
           rm terraform-$(ENVTODEPLOY)-plan.txt
         displayName: 'Clean Up'
         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
@@ -70,9 +80,9 @@ stages:
           displayName: 'Initializing the Infra'
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
         
-        - task: DownloadPipelineArtifact@2
+        - task: DownloadBuildArtifacts@0
           inputs:
-            targetPath: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan.txt'
+            downloadPath: '$(Build.SourcesDirectory)/terraform'
             artifactName: 'terraform-$(ENVTODEPLOY)-plan'
           displayName: 'Download Terraform Plan Artifact'
       
@@ -80,7 +90,7 @@ stages:
           inputs:
            targetType: inline
            script: |
-             terraform apply -input=false $(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan.txt | tee terraform-apply.txt
+             terraform apply -input=false $(Build.SourcesDirectory)/terraform/terraform.plan | tee terraform-apply.txt
         
         - task: PublishBuildArtifacts@1
           inputs:
