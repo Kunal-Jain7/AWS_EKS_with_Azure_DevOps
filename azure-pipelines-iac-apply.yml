@@ -9,7 +9,7 @@ trigger:
 stages:
 - stage: Plan
   displayName: 'Terraform init and Plan'
-  condition: eq(variables['terraformApplyPlan'], 'false')
+  condition: or(eq(variables['terraformApplyPlan'], 'false'), eq(variables['terraformApplyPlan'], 'true'))
   jobs:
   - job: TerraformInitandPlan
     pool:
