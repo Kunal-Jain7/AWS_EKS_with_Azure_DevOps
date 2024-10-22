@@ -11,9 +11,9 @@ stages:
   displayName: 'Terraform init and Plan'
   jobs:
   - job: TerraformInitandPlan
-  pool:
-    name: Mac_Kubernetes_Helm
-    demands: Agent.Name -equals Kunal-Jains-MacBook-Pro
+    pool:
+      name: Mac_Kubernetes_Helm
+      demands: Agent.Name -equals Kunal-Jains-MacBook-Pro
 
     steps:
       - script: echo Terraform Infrastructure Build
