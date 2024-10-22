@@ -53,6 +53,7 @@ stages:
       - script: |
           terraform show -json terraform.plan | python3 -m json.tool > terraform_plan.json
         displayName: 'Convert Terraform Plan to JSON'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
       
       - task: PublishBuildArtifacts@1
         inputs:
