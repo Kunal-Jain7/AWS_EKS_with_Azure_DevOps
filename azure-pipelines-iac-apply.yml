@@ -80,7 +80,7 @@ stages:
           inputs:
            targetType: inline
            script: |
-             terraform apply -input=false $(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan | tee terraform-apply.txt
+             terraform apply -input=false $(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan.txt | tee terraform-apply.txt
         
         - task: PublishBuildArtifacts@1
           inputs:
