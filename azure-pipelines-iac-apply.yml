@@ -86,6 +86,19 @@ stages:
             downloadPath: '$(Build.SourcesDirectory)/terraform'
             artifactName: 'terraform-$(ENVTODEPLOY)-plan'
           displayName: 'Download Terraform Plan Artifact'
+        
+        - task: Bash@3
+          inputs:
+            targetType: inline
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            script: 'terraform init'
+      
+        - task: Bash@3
+          inputs:
+            targetType: inline
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            script: 'terraform workspace select $(ENVTODEPLOY) || terraform workspace new $(ENVTODEPLOY)'
+        
         - task: Bash@3
           inputs:
             targetType: inline
