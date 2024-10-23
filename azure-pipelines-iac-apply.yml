@@ -88,10 +88,18 @@ stages:
           displayName: 'Download Terraform Plan Artifact'
         - task: Bash@3
           inputs:
-           targetType: inline
-           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-           script: |
+            targetType: inline
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            script: 'terraform plan -out=terraform.plan -detailed-exitcode -input=false -no-color | tee terraform-$(ENVTODEPLOY)-plan.txt'
+            failOnStderr: true
+        
+        - task: Bash@3
+          inputs:
+            targetType: inline
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            script: |
              terraform apply -input=false terraform.plan | tee terraform-apply.txt
+            failOnStderr: true
         
         - task: PublishBuildArtifacts@1
           inputs:
