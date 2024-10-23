@@ -111,14 +111,15 @@ stages:
             targetType: inline
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
             script: |
-             terraform apply -input=false terraform.plan | tee terraform-apply.txt
+             terraform apply -input=false terraform.plan | tee terraform-$(ENVTODEPLOY)-apply.txt
             failOnStderr: true
         
         - task: PublishBuildArtifacts@1
           inputs:
-           PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-apply.txt'
-           ArtifactName: 'terraform-$(ENVTODEPLOY)-apply'
+            PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-apply.txt'
+            ArtifactName: 'terraform-$(ENVTODEPLOY)-apply'
           displayName: 'Archive Terraform Apply Output'
+
         
         - script: |
             rm terraform-$(ENVTODEPLOY)-apply.txt
