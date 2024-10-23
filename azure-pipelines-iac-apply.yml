@@ -91,7 +91,7 @@ stages:
            targetType: inline
            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
            script: |
-             terraform apply -input=false $(Build.SourcesDirectory)/terraform/terraform.plan | tee terraform-apply.txt
+             terraform apply -input=false terraform.plan | tee terraform-apply.txt
         
         - task: PublishBuildArtifacts@1
           inputs:
