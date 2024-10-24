@@ -1,3 +1,7 @@
+variable "configure_branch" {
+  default = "main"
+}
+
 terraform {
   backend "s3" {
     bucket = "eks-terraform-ado"
@@ -5,7 +9,7 @@ terraform {
     region = "eu-west-1"
   }
 }
-/*
+
 module "vpc" {
   source = "./networking"
 
@@ -17,4 +21,3 @@ module "vpc" {
   private_subnet_1_cidr = local.private_subnet_1_cidr
   private_subnet_2_cidr = local.private_subnet_2_cidr
 }
-*/

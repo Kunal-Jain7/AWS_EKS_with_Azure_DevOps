@@ -3,6 +3,11 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
+parameters:
+  - name: branchName
+    type: string
+    default: main
+
 trigger:
 - main
 
@@ -26,6 +31,7 @@ stages:
           targetType: inline
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
           script: 'terraform init'
+        displayName: 'Checking out ${{ parameters.branchName }}'
       
       - task: Bash@3
         inputs:
