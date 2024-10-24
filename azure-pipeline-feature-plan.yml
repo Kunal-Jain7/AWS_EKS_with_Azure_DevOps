@@ -1,0 +1,62 @@
+trigger:
+- feature/*
+
+stages:
+- stage: Plan
+  displayName: 'Terraform init and Plan'
+  condition: or(eq(variables['terraformApplyPlan'], 'false'), eq(variables['terraformApplyPlan'], 'true'))
+  jobs:
+  - job: TerraformInitandPlan
+    pool:
+      name: Mac_Kubernetes_Helm
+      demands: Agent.Name -equals Kunal-Jains-MacBook-Pro
+
+    steps:
+      - script: echo Terraform Infrastructure Build
+        displayName: 'Initializing the Infra'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      
+      - task: Bash@3
+        inputs:
+          targetType: inline
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          script: 'terraform init'
+      
+      - task: Bash@3
+        inputs:
+          targetType: inline
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          script: 'terraform workspace select $(ENVTODEPLOY) || terraform workspace new $(ENVTODEPLOY)'
+      
+      - script: echo Terraform infrastructure Plan
+        displayName: 'Running the terraform plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      
+      - task: Bash@3
+        inputs:
+          targetType: inline
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          script: 'terraform plan -out=terraform.plan -detailed-exitcode -input=false -no-color | tee terraform-$(ENVTODEPLOY)-plan.txt'
+          failOnStderr: true
+      
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODEPLOY)-plan.txt'
+          ArtifactName: 'terraform-$(ENVTODEPLOY)-plan'
+        displayName: 'Archive Terraform Plan Output'
+      
+      - script: |
+          terraform show -json terraform.plan | python3 -m json.tool > terraform_plan.json
+        displayName: 'Convert Terraform Plan to JSON'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform_plan.json'
+          ArtifactName: 'terraform-plan-json'
+        displayName: 'Archive Terraform Plan JSON'
+
+      - script: |
+          rm terraform-$(ENVTODEPLOY)-plan.txt
+        displayName: 'Clean Up'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
