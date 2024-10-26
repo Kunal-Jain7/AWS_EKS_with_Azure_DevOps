@@ -21,3 +21,10 @@ module "vpc" {
   private_subnet_1_cidr = local.private_subnet_1_cidr
   private_subnet_2_cidr = local.private_subnet_2_cidr
 }
+
+module "securitygroup" {
+  source = "./securitygroup"
+
+  stack_env = local.stack_env
+  vpc_id    = module.vpc.vpc_id
+}
