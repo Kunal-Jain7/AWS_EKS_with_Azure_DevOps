@@ -1,0 +1,73 @@
+# Starter pipeline
+# This is the pipeline for destroying the terraform infrastructure which has been deployed.
+# It will first run the plan and then it will destroy the infrastructure.
+# https://aka.ms/yaml
+
+parameters:
+  - name: branchName
+    default: main
+    type: string
+
+trigger:
+- main
+
+stages:
+- stage: Plan
+  displayName: 'Terraform init and plan'
+  condition: or(eq(variables['terraformDestroyPlan'], 'false'), eq(variables['terraformDestroyPlan'], 'true'))
+  jobs:
+    - job: TerraformInitAndPlan
+      pool:
+        name: Mac_Kubernetes_Helm
+        demands: Agent.Name -equals Kunal-Jains-MacBook-Pro
+      
+      steps:
+        - script: echo Terraform Infrastructure Build
+          displayName: 'Initializing the Infra'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      
+        - task: Bash@3
+          inputs:
+            targetType: inline
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            script: 'terraform init'
+          displayName: 'Checking out ${{ parameters.branchName }}'
+        
+        - task: Bash@3
+          inputs: 
+            targetType: inline
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            script: 'terraform workspace select $(ENVTODESTROY) || terraform workspace new $(ENVTODESTROY)'
+        
+        - script: echo Terraform infrastructure Plan
+          displayName: 'Running the Terraform Plan'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+        
+        - task: Bash@3
+          inputs:
+            targetType: inline
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            script: 'terraform plan -out=terraform.plan -detailed-exitcode -input=false -no-color | tee terraform-$(ENVTODESTROY)-plan.txt'
+            failOnStderr: true
+        
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform-$(ENVTODESTROY)-plan.txt'
+            ArtifactName: 'terraform-$(ENVTODESTROY)-plan'
+          displayName: 'Archive Terraform Plan Output'
+        
+        - script: |
+            terraform show -json terraform.plan | python3 -m json.tool > terraform_plan.json
+          displayName: 'Convert Terraform Plan to JSON'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Build.SourcesDirectory)/terraform/terraform_plan.json'
+            ArtifactName: 'terraform-plan-json'
+          displayName: 'Archive Terraform Plan JSON'
+
+        - script: |
+            rm terraform-$(ENVTODESTROY)-plan.txt
+          displayName: 'Clean Up'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
